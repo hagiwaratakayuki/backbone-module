@@ -1,7 +1,7 @@
 backbone-module
 ===============
 
-A simple module system for backbone.js.event process make reusable easiry.
+A simple module system for backbone.js.Å@event process make reusable easiry.
 
 ##How To Use
 
@@ -10,7 +10,7 @@ A simple module system for backbone.js.event process make reusable easiry.
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <script src="js/underscore.js" type="text/javascript"></script>
     <script src="js/backbone.js" type="text/javascript"></script>
-    <script src="js/backbone/backbone.module.js" type="text/javascript"></script>
+    <script src="js/backbone.module.js" type="text/javascript"></script>
 
 2.regist your cool module.
 
@@ -65,4 +65,6 @@ A simple module system for backbone.js.event process make reusable easiry.
     });
 
 
+##TODO
 
+ write test and modules.
