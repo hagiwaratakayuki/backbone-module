@@ -1,7 +1,7 @@
 backbone-module
 ===============
 
-A simple module system for backbone.js.Å@event process make reusable easiry.
+A simple module system for backbone.js. event process make reusable easiry.
 
 ##How To Use
 
@@ -67,4 +67,4 @@ A simple module system for backbone.js.Å@event process make reusable easiry.
 
 ##TODO
 
- write test and modules.
+ write tests and modules and samples.
