@@ -51,7 +51,7 @@ A simple module system for backbone.js. event process make reusable easiry.
 			window.alert('mouseover');
 		}
     
-});
+    });
 
 4.bind to backbone class and use.
 
