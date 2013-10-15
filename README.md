@@ -1,4 +1,4 @@
-backbone-module
+Backbone.Module
 ===============
 
 A simple module system for backbone.js. event process make reusable easiry.
@@ -16,50 +16,52 @@ A simple module system for backbone.js. event process make reusable easiry.
 
     Backbone.Module.regist('my.cool.module',//module name.
     {
-    	events:{
-		"click":"onClick"	
-	},
-	onClick:function(event,next){
-		if(next){//super class method in last arg if exist.
-			next.call(this,event);
-		}
-		window.alert('click');
-	}
+        events:{
+	       "click":"onClick"
+        },
+        onClick:function(event,next){
+                if(next){//super class method in last arg if exist.
+			
+                     next.call(this,event);
+		
+                }
+                window.alert('click');
+         }
     
-    })
+    });
 
 3 extend your module.
 
     Backbone.Module.registWrap('my.cool.module.extend',
-    'my.cool.module',//regited module name or object you want extend.
-    {
-    	events:{
-		"mousemouseover":"onMouseover"	
-	},
-	onClick:function(event,next){
+    	'my.cool.module',//regited module name or object you want extend.
+        {
+	    	events:{
+			"mousemouseover":"onMouseover"	
+		},
+		onClick:function(event,next){
 		
-		next.call(this,event);//next is my.cool.module.Onclick
+			next.call(this,event);//next is my.cool.module.onClick
+			window.alert('extend!');
 		
-		window.alert('extend!');
-	},
-	onMouseover:function(event,next){
-		if(next){
-			next.call(this,event);
+		},
+		onMouseover:function(event,next){
+			if(next){
+				next.call(this,event);
+			}
+			window.alert('mouseover');
 		}
-		window.alert('mouseover');
-	
-	}
     
-    });
+});
 
 4.bind to backbone class and use.
 
-    var view =Backbone.Module.extendView('my.cool.module.extend',
-    					{
-    						el:"#test",
-    
-    					});
+    var view = Backbone.Module.extendView(
+                 'my.cool.module.extend',
+                 {
+                      el:"#test",
+                 });
     $(function(){
+    
     	 new view();
     
     });
