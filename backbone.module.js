@@ -9,17 +9,16 @@
 	      return wrapper.apply(this, args);
 	    };
 	};
-	module.wrap = function() {//イベントと固定パラメーターをextend、それ以外をwrapTail
+	module.wrap = function() {//_.extend event, rout,fixedparam, wrapTail function
 		var ret = this._getResult();
-		var events = {};		
 		for ( var i = 0; i < arguments.length; i++) {
 			var argument = arguments[i];
 			var mod = this._getModule(argument);
 			for ( var name in mod) {
 				var prop = mod[name];
-				if (name === 'events' ) {
+				if (_.isObject(prop) === true && (_.isUndefined(ret[name]) === true || _.isObject(ret[name]))) {
 					
-					events = _.extend(events,prop);
+					ret[name] = _.extend(ret[name] || {},prop);
 									
 				}
 				else
@@ -42,7 +41,6 @@
 			}
 			
 		}
-		ret.events = events;
 		return ret;
 	};
 	
@@ -67,17 +65,17 @@
 	};
 	
 	//regist module
-	module.regist = function(namespace,mod){//モジュールを登録
+	module.regist = function(namespace,mod){//regist module
 		
 		this._registNameSpace(namespace, mod);
 				
 	};
-	module.registWrap = function(namespace) {//複数のモジュールを継承して登録
+	module.registWrap = function(namespace) {//regist width extend
 		var args = Array.prototype.slice.call(arguments,1);
 		var mod = this.wrap.apply(this, args);
 		this._registNameSpace(namespace, mod);
 	};
-	module._registNameSpace = function(namespace,mod){//登録処理
+	module._registNameSpace = function(namespace,mod){
 		
 		var names = namespace.split(".");
 		var regist_name = names.pop();

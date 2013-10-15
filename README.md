@@ -38,7 +38,7 @@ A simple module system for backbone.js. event process make reusable easiry.
 	},
 	onClick:function(event,next){
 		
-		next.call(this,event);//nest is my.cool.module.Onclick
+		next.call(this,event);//next is my.cool.module.Onclick
 		
 		window.alert('extend!');
 	},
