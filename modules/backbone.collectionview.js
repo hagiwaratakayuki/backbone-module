@@ -1,15 +1,27 @@
+//module for display collenction node.
+//stab.
+
 (function() {
 	'use strict';
 	
 	Backbone.Module.regist('collectionview.parent',{
 		auto_render:false,
+		viewport:null,
+		vecter:false,
 		initialize:function(options){
 			this.views = [];
 			this.view_class = options.view_class || this.view_class;
+			
+			if(this.viewport){
+				this.$viewport = this.$el.find(this.viewport);
+			}
+			else
+			{
+				this.$viewport = this.$el;
+			}
 			if(this.auto_render){
 				this.render(options.values,options);
 			}
-
 		},
 		render:function(values,options,next){
 			if(next){
@@ -17,28 +29,26 @@
 			}
 			var my = this;
 			var callback = function(){
-				if(my.collection){
-					my.renderCollection(options);
-				}
-				else{
-				    
-					my.renderValues(values,options);
 				
-				}
-				/*if(my.autobind && my.collection){
-					my.collection.on({
-						
-						
-					});					
-				}*/
+				    
+				my.renderValues(values,options);
+				
+				
+				
 				
 			};
-			this.loadTemplate(options,callback);
+			if(this.template){
+				callback.call(this);
+			}
+			else
+			{
+				this.loadTemplate(options,callback);
+			}
 		},
 		loadTemplate:function(options,callback,next){
 			options = options || {};
 			var selecter = options.template_id || this.template_id;
-			var test = $(selecter).html()
+			
 			this.template = _.template($(selecter).html());		
 			
 			if(next){
@@ -57,12 +67,14 @@
 			for ( var i = 0; i < values.length; i++) {
 				var value = values[i];
 				
-				this.append(value,options);
+				this.add(value,options);
 			}
 		},
 		renderCollection:function(options,next){
-			
-			this.collection.forEach(this.renderModel,this);
+			var my = this;
+			this.collection.forEach(function(model){
+				my.renderModel(model, options);
+			});
 			if(next){
 				next.call(this);
 				
@@ -71,33 +83,61 @@
 		},
 		renderModel:function(model,options,next){
 			if(next){
-				next.call(this);
+				next.call(this,opt);
 				
 			}
-			var value = model.properties;
-			this.append(value);
+			options = _.extend({model:model},options || {});
+			this.render([model.attributes],options);
 			
 		},
-		append:function(value,options,next){
+		add:function(value,options,next){
 			
-			options = options || {};
 			if(next){
 				next.call(this,value,options);
 				
 			}
-			options = _.extend({template:this.template,value:value},options);
+			options = _.extend({template:this.template,value:value},options || {});
+			
 			var view = new this.view_class(options);
-			this.appendViewport(view);
+			this.addViewport(view,options.at);
 			return view;
 			
 		},
-		appendViewport:function(view,next){
+		addViewport:function(view,at,next){
 			if(next){
 				
 				next.call(this,view);
 			}
-			this.views.push(view);
-			this.$el.append(view.$el);
+			var $children = this.$viewport.children();
+			if($children.length === 0){
+				this.views.push(view);
+				this.$viewport.append(view.$el);
+			}
+			else
+			{
+				if(_.isUndefined(at)){
+					this.views.push(view);
+					this.$viewport.append(view.$el);
+					
+				}
+				else
+				{
+					if(at >= $children.length){
+						
+						this.views.push(view);
+						this.$viewport.append(view.$el);
+					}
+					else
+					{
+						$children.eq(at).before(view.$el);
+						this.views.splice(at, 0, view)
+						
+					}
+				}
+				
+				
+				
+			}
 		}		
 	});
 	
@@ -140,5 +180,76 @@
 		}
 	
 	});
-	
+	Backbone.Module.registWrap('collectionview.parent.subscribe',
+		'collectionview.parent',
+		{
+			guard:true,
+			now_at:null,
+			initialize:function(options,next){
+				if(_.isFunction(options)){
+					next = options;
+					options = {};
+				}
+				if(next){
+					next.call(this,options);				
+				}
+				this.collection.bind('reset',_.bind(this.onReset,this));
+				this.collection.bind('add',_.bind(this.onAdd,this));
+				this.collection.bind('change',_.bind(this.onChange,this));
+				this.collection.bind('remove',_.bind(this.onRemove,this));
+			},
+			onReset:function(collections,next){
+				this.$viewport.empty();
+			},
+			onAdd:function(model, collection, options,next){
+				
+				
+				if(next){
+					next.call(this,options);
+				}
+				if(this.guard){
+					
+					if(_.isUndefined(options.at) === false && this.now_at === options.at){
+						return;
+					}
+					this.now_at = options.at;
+					
+				}
+				this.renderModel(model,options);
+			},
+			onChange:function(){
+
+			
+			},
+			onRemove:function(model, options,next){
+				_.reject(this.views,function(view){
+							return view.model.cid === model.cid;
+				})
+				
+			},
+			
+		}
+	);
+	Backbone.Module.registWrap('collectionview.node.subscribe',
+		'collectionview.node',
+		{
+			initialize:function(options,next){
+				next.call(this,options);				
+				this.model.bind('destroy',_.bind(this.onDestroy,this));				
+				this.model.bind('change',_.bind(this.onChange,this));
+				
+			},
+			onDestroy:function(){
+				this.$el.remove();
+				this.$el = null;
+			},
+			onChange:function(){
+				
+			},
+						
+			
+			
+			
+		}
+	)
 })();

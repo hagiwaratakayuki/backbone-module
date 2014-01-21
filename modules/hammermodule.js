@@ -1,3 +1,6 @@
+//module for touch display dragable
+//ex hammer.js http://eightmedia.github.io/hammer.js/
+
 (function() {
 	'use strict';
 
@@ -24,7 +27,11 @@
 	    	this.$el.hammer();
 	    	if(_.has(this,'$el') === true && _.isUndefined(this.$el.hammer) === false){
 				this._hammerd = true;
-				this.$el.hammer();
+				this.$el.hammer({
+		            prevent_default: true,
+		            scale_treshold: 0,
+		            drag_min_distance: 0
+		        });
 				
 			}
 	    },
@@ -41,6 +48,20 @@
 		events:{
 			'dragstart':"onDragStart",
 			'drag':"onDrag",
+			'touch':"onTouch",
+		},
+		initialize:function(options,next){
+			if(next){
+				next.call(this,options);
+				
+			}
+			setInterval(_.bind(this.watchDrag,this), 10);
+		},
+		onTouch:function(event,next){
+			if(next){
+				next.call(this);
+			}
+			
 		},
 		onDragStart:function(event){
 			var position = this.getPosition();
@@ -49,15 +70,21 @@
 			
 		},
 		onDrag:function(event){
-			event.preventDefault();				
-
+			
+			if(!event.gesture){
+				return;
+			}
 			var left = this.start_left + event.gesture.deltaX;
 			var top =  this.start_top + event.gesture.deltaY;
-			if (left >= 0 && top >= 0){
 			
-				this.$el.css({left:left.toString() + "px",top:top.toString() + "px"});
+			this.drag = {top:top,left:left};
+			
+		},
+		watchDrag:function(){
+			
+			if(this.drag){
+				this.$el.css({left:this.drag.left.toString() + "px",top:this.drag.top.toString() + "px"});
 			}
-			return {top:top,left:left};
 		},
 		getPosition:function(){
 			var ret = {};
@@ -94,7 +121,7 @@
 				transforms.push(rotation_str);
 			}
 			this.$el.css('transform',transforms.join(" "));
-			this.now_rotate = gesture.rotation + rotation;
+			this.now_rotate = gesture.rotation + gesture.rotation;
 			this.now_scale = scale * gesture.scale;
 	    },
 	    onTransformEnd:function(event){

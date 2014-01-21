@@ -3,8 +3,14 @@
 	var module = Backbone.Module = {};
 	module.namespaces = {};	
 	var wrapTail = function(func, wrapper) {
+	    var arg_count =  wrapper.length -1;
 	    return function() {
-	      var args = Array.prototype.slice.call(arguments);;
+	      var args = Array.prototype.slice.call(arguments);
+	      if(args.length < arg_count){
+	    	  for ( var i = 0; i < arg_count - args.length ; i++) {
+	    		  args.push(undefined);
+			  }  	  
+	      }
 	      args.push(func);
 	      return wrapper.apply(this, args);
 	    };
@@ -13,17 +19,17 @@
 		var ret = this._getResult();
 		for ( var i = 0; i < arguments.length; i++) {
 			var argument = arguments[i];
-			var mod = this._getModule(argument);
+			var mod = this.getModule(argument);
 			for ( var name in mod) {
 				var prop = mod[name];
-				if (_.isObject(prop) === true && (_.isUndefined(ret[name]) === true || _.isObject(ret[name]))) {
+				if (this._extendable(prop) && (_.isUndefined(ret[name]) === true || this._extendable(ret[name]))) {
 					
 					ret[name] = _.extend(ret[name] || {},prop);
 									
 				}
 				else
 				{
-					if(_.has(ret,name)){
+					if(_.isUndefined(ret,name) !== true){
 						if(typeof ret[name] === 'function'){
 							ret[name] = wrapTail(ret[name],prop);
 						}
@@ -43,37 +49,55 @@
 		}
 		return ret;
 	};
-	
+	module._extendable = function(prop) {
+		return _.isObject(prop) === true &&_.isFunction(prop) === false &&_.isArray(prop) === false;
+	}
 	//extend Backbone basic class
 	module.extendView = function() {
-		var args = Array.prototype.slice.call(arguments);
-		var ex = this.wrap.apply(this, args);
-		return Backbone.View.extend(ex);		
+		var modules = Array.prototype.slice.call(arguments);
+		return this.extendTo(Backbone.View, modules);		
 	};
 	
 	module.extendModel = function() {
-		var args = Array.prototype.slice.call(arguments);
-		var ex = this.wrap.apply(this, args);
-		return Backbone.Model.extend(ex);
+		var modules = Array.prototype.slice.call(arguments);
+		return this.extendTo(Backbone.Model, modules);
 		
 	};
 	module.extendCollection = function() {
-		var args = Array.prototype.slice.call(arguments);
-		var ex = this.wrap.apply(this, args);
-		return Backbone.Collection.extend(ex);
+		
+		var modules = Array.prototype.slice.call(arguments);
+		return this.extendTo(Backbone.Collection, modules);
 		
 	};
+	module.extendRouter = function(){
+		
+		var modules = Array.prototype.slice.call(arguments);
+		return this.extendTo(Backbone.Model, modules);
+	};
+	
+	module.extendTo = function(target,modules) {
+		if(_.isArray(modules) === false){
+			 
+			modules = Array.prototype.slice.call(arguments);
+			modules.shift();
+		}
+	
+		var ex = this.wrap.apply(this, modules);
+		return target.extend(ex);
+	}
+	
 	
 	//regist module
 	module.regist = function(namespace,mod){//regist module
 		
 		this._registNameSpace(namespace, mod);
-				
+		return mod;		
 	};
-	module.registWrap = function(namespace) {//regist width extend
+	module.registWrap = function(namespace) {//regist with extend
 		var args = Array.prototype.slice.call(arguments,1);
 		var mod = this.wrap.apply(this, args);
 		this._registNameSpace(namespace, mod);
+		return mod;
 	};
 	module._registNameSpace = function(namespace,mod){
 		
@@ -93,9 +117,9 @@
 			
 		}
 		target[regist_name] = mod;
-	}
+	};
 	
-	module._getModule =function(param){
+	module.getModule =function(param){
 		if(_.isString(param) === false){
 		
 			return param;

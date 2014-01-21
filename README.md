@@ -35,34 +35,35 @@ A simple module system for backbone.js. event process make reusable easiry.
     Backbone.Module.registWrap('my.cool.module.extend',
     	'my.cool.module',//regited module name or object you want extend.
         {
-	    	events:{
-			"mousemouseover":"onMouseover"	
-		},
-		onClick:function(event,next){
+        events:{
+              "mousemouseover":"onMouseover"	
+        },
+        onClick:function(event,next){
 		
-			next.call(this,event);//next is my.cool.module.onClick
-			window.alert('extend!');
+           next.call(this,event);//next is my.cool.module.onClick
+           window.alert('extend!');
 		
-		},
-		onMouseover:function(event,next){
-			if(next){
-				next.call(this,event);
-			}
-			window.alert('mouseover');
-		}
+        },
+        onMouseover:function(event,next){
+            if(next){
+            
+                next.call(this,event);
+            }
+            window.alert('mouseover');
+        }
     
     });
 
 4.bind to backbone class and use.
 
     var view = Backbone.Module.extendView(
-                 'my.cool.module.extend',
-                 {
+                   'my.cool.module.extend',
+                   {
                       el:"#test",
-                 });
+                    });
     $(function(){
     
-    	 new view();
+    	new view();
     
     });
 
